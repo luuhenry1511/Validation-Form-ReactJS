@@ -4,10 +4,20 @@ import './index.css';
 import App from './App';
 
 function Validator(options){
+
+    function getParent (element, selector) {
+        while (element.parentElement){
+            if (element.parentElement.matches(selector)){
+                return element.parentElement;
+            }
+            element = element.parentElement;
+        }
+    }
     var selectorRules={};
 
     function validate(inputElement, rule){
-        var errorElement = inputElement.parentElement.querySelector(options.errorSelector);
+        
+        var errorElement = getParent(inputElement, options.formGroupSlector).querySelector(options.errorSelector);
         var errorMessage;
         //lấy các rules của 1 selector
         var rules = selectorRules[rule.selector];
@@ -20,10 +30,10 @@ function Validator(options){
         }          
                     if (errorMessage){
                         errorElement.innerText = errorMessage;
-                        inputElement.parentElement.classList.add('invalid');
+                        getParent(inputElement, options.formGroupSlector).classList.add('invalid');
                     } else {
                         errorElement.innerText = "";
-                        inputElement.parentElement.classList.remove('invalid');
+                        getParent(inputElement, options.formGroupSlector).classList.remove('invalid');
                     }   
                     return !errorMessage; 
     }
@@ -51,7 +61,8 @@ function Validator(options){
                 if (typeof options.onSubmit === 'function'){
                     var enableInputs = formElement.querySelectorAll('[name]');
                     var formValues=Array.from(enableInputs).reduce(function(values, input){
-                    return (values[input.name] = input.value) && values;
+                    values[input.name] = input.value
+                    return  values;
             },{});
                 options.onSubmit(formValues);
                 } 
@@ -131,6 +142,7 @@ Validator.isConfirmed = function (selector, getConfirmValue, message) {
         Validator({
           form: '#form-1',
           errorSelector: '.form-message',
+          formGroupSelector: './form-group',
           rules: [
             Validator.isRequired('#fullname', 'Vui lòng nhập tên đầy đủ của bạn'),
             Validator.isRequired('#email'),
