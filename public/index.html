@@ -9,14 +9,14 @@
     <div class="main">
 
       <form action="" method="POST" class="form" id="form-1">
-        <h3 class="heading">Thành viên đăng ký</h3>
-        <p class="desc">Cùng nhau học lập trình miễn phí tại F8 ❤️</p>
+        <h3 class="heading">ĐĂNG KÝ TÀI KHOẢN</h3>
+        <p class="desc">Cùng nhau học lập trình</p>
 
         <div class="spacer"></div>
 
         <div class="form-group">
           <label for="fullname" class="form-label">Tên đầy đủ</label>
-          <input id="fullname" name="fullname" type="text" placeholder="VD: Sơn Đặng" class="form-control">
+          <input id="fullname" name="fullname" type="text" placeholder="VD: Nguyễn Luân Lưu" class="form-control">
           <span class="form-message"></span>
         </div>
 
@@ -38,12 +38,20 @@
           <span class="form-message"></span>
         </div>
 
+        <div class="form-group">
+          <label for="gender" class="form-label">Giới tính</label>
+          <div><input name="gender" type="radio" value="male" class="form-control">Nam </div>
+          <div><input name="gender" type="radio" value="female" class="form-control">Nữ </div>
+          <div><input name="gender" type="radio" value="other" class="form-control">Khác </div>
+          <span class="form-message"></span>
+        </div>
+        
         <button class="form-submit">Đăng ký</button>
       </form>
 
       <form action="" method="POST" class="form" id="form-2">
-        <h3 class="heading">Đăng nhập</h3>
-        <p class="desc">Cùng nhau học lập trình miễn phí tại F8 ❤️</p>
+        <h3 class="heading">ĐĂNG NHẬP</h3>
+        <p class="desc">Cùng nhau học lập trình </p>
 
         <div class="spacer"></div>
 
@@ -59,17 +67,56 @@
           <span class="form-message"></span>
         </div>
 
+
         <button class="form-submit">Đăng nhập</button>
       </form>
 
     </div>
-    <script type="text/javascript" src="../src/index.js"></script>
+    <script type="text/javascript" src="../src/index.js">
+    </script>
 
-    <!-- <script >
+    <script >
 
-     
+      // Mong muốn của chúng ta
+        Validator({
+          form: '#form-1',
+          errorSelector: '.form-message',
+          formGroupSelector: '.form-group',
+          rules: [
+            Validator.isRequired('#fullname', 'Vui lòng nhập tên đầy đủ của bạn'),
+            Validator.isRequired('#email'),
+            Validator.isEmail('#email'),
+            Validator.isRequired("#password"),
+            Validator.minLength('#password',6),
+            Validator.isRequired('#password_confirmation', 'Vui lòng nhập mật khẩu'),
+            Validator.isConfirmed("#password_confirmation", function(){
+                return document.querySelector("#form-1 #password").value;
+            }, 'Mật khẩu nhập lại không chính xác'),
+            Validator.isRequired('input[name="gender"]'),
+          ],
+          onSubmit: function(data) {
+              //call API
+              console.log(data);
+          }
+          
+        });
   
-    </script> -->
+  
+        Validator({
+          form: '#form-2',
+          formGroupSelector: '.form-group',
+          errorSelector: '.form-message',
+          rules: [
+            Validator.isEmail('#email'),
+            Validator.minLength('#password', 6),
+          ],
+          onSubmit: function (data) {
+            // Call API
+            console.log(data);
+          }
+        });
+  
+    </script>
 
   </body>
   

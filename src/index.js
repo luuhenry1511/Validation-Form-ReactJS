@@ -16,26 +16,36 @@ function Validator(options){
     var selectorRules={};
 
     function validate(inputElement, rule){
-        
-        var errorElement = getParent(inputElement, options.formGroupSlector).querySelector(options.errorSelector);
+        var errorElement = getParent(inputElement, options.formGroupSelector).querySelector(options.errorSelector);
         var errorMessage;
-        //lấy các rules của 1 selector
+
+        // Lấy ra các rules của selector
         var rules = selectorRules[rule.selector];
 
-        //lặp qua từng rule và kiểm tra
-        //nếu có lỗi thì dừng việc kiểm tra
-        for (var i=0; i<rules.length; ++i){
-            errorMessage = rules[i](inputElement.value);
+        // Lặp qua từng rule & kiểm tra
+        // Nếu có lỗi thì dừng việc kiểm
+        for (var i = 0; i < rules.length; ++i) {
+            switch (inputElement.type) {
+                case 'radio':
+                case 'checkbox':
+                    errorMessage = rules[i](
+                        formElement.querySelector(rule.selector + ':checked')
+                    );
+                    break;
+                default:
+                    errorMessage = rules[i](inputElement.value);
+            }
             if (errorMessage) break;
-        }          
-                    if (errorMessage){
-                        errorElement.innerText = errorMessage;
-                        getParent(inputElement, options.formGroupSlector).classList.add('invalid');
-                    } else {
-                        errorElement.innerText = "";
-                        getParent(inputElement, options.formGroupSlector).classList.remove('invalid');
-                    }   
-                    return !errorMessage; 
+        }
+        if (errorMessage) {
+            errorElement.innerText = errorMessage;
+            getParent(inputElement, options.formGroupSelector).classList.add('invalid');
+        } else {
+            errorElement.innerText = '';
+            getParent(inputElement, options.formGroupSelector).classList.remove('invalid');
+        }
+    
+        return !errorMessage; 
     }
     var formElement = document.querySelector(options.form);
     
@@ -61,7 +71,28 @@ function Validator(options){
                 if (typeof options.onSubmit === 'function'){
                     var enableInputs = formElement.querySelectorAll('[name]');
                     var formValues=Array.from(enableInputs).reduce(function(values, input){
-                    values[input.name] = input.value
+                    
+                    switch(input.type){
+                        case 'radio':
+                        
+                            values[input.name]= formElement.querySelector('input[name="'+ input.name + '"]:checked').value;
+                            break;
+                        case 'checkbox':
+                            if (!input.matches(':checked')){
+                                values[input.name]='';
+                                return values;
+                            }
+                            if (Array.isArray(values[input.name])){
+                                values[input.name] = []
+                            }
+                            values[input.name].push(input.value);
+                            break;
+                        case 'file':
+                            values[input.name] = input.files;
+                        default:
+                            values[input.name]= input.value;
+                    }
+                    
                     return  values;
             },{});
                 options.onSubmit(formValues);
@@ -91,9 +122,9 @@ function Validator(options){
                 }
                 //xử lý mỗi khi người dùng nhập vào input
                 inputElement.oninput= function(){
-                    var errorElement = inputElement.parentElement.querySelector('.form-message');
+                    var errorElement = getParent(inputElement, options.formGroupSelector).querySelector('.form-message');
                     errorElement.innerText = "";
-                    inputElement.parentElement.classList.remove('invalid');
+                    getParent(inputElement, options.formGroupSelector).classList.remove('invalid');
                 }
             }
             
@@ -106,7 +137,7 @@ Validator.isRequired = function(selector, message){
     return {
         selector: selector,
         test: function(value){
-           return( value.trim() ? undefined :  message ||'Vui lòng nhập vào trường này');
+           return( value ? undefined :  message ||'Vui lòng nhập vào trường này');
         }
     };
 }
@@ -137,46 +168,46 @@ Validator.isConfirmed = function (selector, getConfirmValue, message) {
         }
     };
 }
- document.addEventListener('DOMContentLoaded', function () {
-        // Mong muốn của chúng ta
-        Validator({
-          form: '#form-1',
-          errorSelector: '.form-message',
-          formGroupSelector: './form-group',
-          rules: [
-            Validator.isRequired('#fullname', 'Vui lòng nhập tên đầy đủ của bạn'),
-            Validator.isRequired('#email'),
-            Validator.isEmail('#email'),
-            Validator.isRequired("#password"),
-            Validator.minLength('#password',6),
-            Validator.isRequired('#password_confirmation', 'Vui lòng nhập mật khẩu'),
-            Validator.isConfirmed("#password_confirmation", function(){
-                return document.querySelector("#form-1 #password").value;
-            }, 'Mật khẩu nhập lại không chính xác'),
-            
-          ],
-          onSubmit: function(data) {
-              //call API
-              console.log(data);
-          }
+//  document.addEventListener('DOMContentLoaded', function () {
+//         // Mong muốn của chúng ta
+//         Validator({
+//           form: '#form-1',
+//           errorSelector: '.form-message',
+//           formGroupSelector: '.form-group',
+//           rules: [
+//             Validator.isRequired('#fullname', 'Vui lòng nhập tên đầy đủ của bạn'),
+//             Validator.isRequired('#email'),
+//             Validator.isEmail('#email'),
+//             Validator.isRequired("#password"),
+//             Validator.minLength('#password',6),
+//             Validator.isRequired('#password_confirmation', 'Vui lòng nhập mật khẩu'),
+//             Validator.isConfirmed("#password_confirmation", function(){
+//                 return document.querySelector("#form-1 #password").value;
+//             }, 'Mật khẩu nhập lại không chính xác'),
+//             Validator.isRequired('input[name="gender"]'),
+//           ],
+//           onSubmit: function(data) {
+//               //call API
+//               console.log(data);
+//           }
           
-        });
+//         });
   
   
-        // Validator({
-        //   form: '#form-2',
-        //   formGroupSelector: '.form-group',
-        //   errorSelector: '.form-message',
-        //   rules: [
-        //     Validator.isEmail('#email'),
-        //     Validator.minLength('#password', 6),
-        //   ],
-        //   onSubmit: function (data) {
-        //     // Call API
-        //     console.log(data);
-        //   }
-        // });
-      });
+//         Validator({
+//           form: '#form-2',
+//           formGroupSelector: '.form-group',
+//           errorSelector: '.form-message',
+//           rules: [
+//             Validator.isEmail('#email'),
+//             Validator.minLength('#password', 6),
+//           ],
+//           onSubmit: function (data) {
+//             // Call API
+//             console.log(data);
+//           }
+//         });
+//       });
 // ReactDOM.render(
   
 //     <App />
